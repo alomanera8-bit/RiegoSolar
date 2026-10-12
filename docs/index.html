@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Riego Solar</title>
+<meta name="theme-color" content="#0f5c3a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='22' fill='%231e6fb8'/%3E%3Cpath d='M24 14s-10 11-10 18a10 10 0 0 0 20 0c0-7-10-18-10-18z' fill='%238fd3ff'/%3E%3Ccircle cx='34' cy='14' r='6' fill='%23ffc531'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #f3f1ea; --card: #fffdf7; --ink: #1d2a22; --muted: #66736a; --line: #e2ddd0;
+    --green: #1f7a4c; --green-bg: #e3f2e8; --amber: #a86400; --amber-bg: #fdf0d8;
+    --red: #b3261e; --red-bg: #fbe4e2; --blue: #1e6fb8; --blue-bg: #e2eefa; --sun: #f2b01e;
+    --shadow: 0 1px 2px rgba(30,40,30,.06), 0 4px 16px rgba(30,40,30,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121713; --card: #1b221d; --ink: #e8eee9; --muted: #9aa89e; --line: #2c362f;
+      --green: #6fd39b; --green-bg: #1c3326; --amber: #f2b45c; --amber-bg: #3a2c14;
+      --red: #f2928b; --red-bg: #3d1d1b; --blue: #8cc2f5; --blue-bg: #17283a; --sun: #f6c445;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 20px 16px 48px; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  header h1 { font-size: 22px; margin: 0; letter-spacing: -.01em; }
+  header .sub { color: var(--muted); font-size: 14px; }
+  header .spacer { flex: 1; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+          padding: 18px; box-shadow: var(--shadow); margin-bottom: 14px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em;
+             color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+  .hero { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .dot { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center;
+         font-size: 26px; flex: none; }
+  .hero .big { font-size: 26px; font-weight: 700; line-height: 1.1; }
+  .hero .small { color: var(--muted); font-size: 14px; }
+  .ok   { background: var(--green-bg); color: var(--green); }
+  .warn { background: var(--amber-bg); color: var(--amber); }
+  .bad  { background: var(--red-bg); color: var(--red); }
+  .info { background: var(--blue-bg); color: var(--blue); }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  button { font: inherit; border-radius: 10px; border: 1px solid var(--line); background: var(--card);
+           color: var(--ink); padding: 10px 16px; cursor: pointer; min-height: 44px; }
+  button.primary { background: var(--green); border-color: var(--green); color: #fff; font-weight: 600; }
+  button.danger { background: var(--red); border-color: var(--red); color: #fff; font-weight: 600; }
+  button:disabled { opacity: .5; cursor: default; }
+  @media (prefers-color-scheme: dark) { button.primary, button.danger { color: #0e130f; } }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .programs { list-style: none; margin: 0; padding: 0; }
+  .programs li { display: flex; align-items: center; gap: 10px; padding: 10px 0;
+                 border-top: 1px solid var(--line); }
+  .programs li:first-child { border-top: 0; }
+  .programs .num { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+                   background: var(--bg); font-size: 13px; font-weight: 600; flex: none; }
+  .programs .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chip { font-size: 12px; padding: 3px 9px; border-radius: 999px; white-space: nowrap; font-weight: 600; }
+  .chip.idle { background: var(--bg); color: var(--muted); }
+  .timeline { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 15px; }
+  .timeline b { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--muted); font-size: 14px; }
+  form { display: grid; gap: 12px; }
+  label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+  input { font: inherit; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--line);
+          background: var(--bg); color: var(--ink); width: 100%; }
+  .err { color: var(--red); font-size: 14px; min-height: 1em; }
+  a { color: var(--blue); }
+  .hidden { display: none !important; }
+  dialog { border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink);
+           padding: 20px; max-width: min(420px, calc(100vw - 32px)); }
+  dialog::backdrop { background: rgba(0,0,0,.4); }
+  .updated { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <svg width="40" height="40" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="22" fill="#1e6fb8"/>
+      <path d="M24 14s-10 11-10 18a10 10 0 0 0 20 0c0-7-10-18-10-18z" fill="#8fd3ff"/>
+      <circle cx="34" cy="14" r="6" fill="#ffc531"/>
+    </svg>
+    <div>
+      <h1>Riego Solar</h1>
+      <div class="sub" id="equipo">Galcon GSI</div>
+    </div>
+    <div class="spacer"></div>
+    <button id="salir" class="hidden" type="button">Salir</button>
+  </header>
+
+  <!-- Login -->
+  <section id="login" class="card hidden">
+    <h2>Entrar con tu cuenta de GSI</h2>
+    <form id="formLogin">
+      <label>Usuario <input id="usuario" autocomplete="username" required></label>
+      <label>Clave <input id="clave" type="password" autocomplete="current-password" required></label>
+      <button class="primary" type="submit">Entrar</button>
+      <div class="err" id="errLogin"></div>
+      <p class="muted">La clave va directo a Galcon y no se guarda: esta página solo recuerda la sesión en este navegador.</p>
+    </form>
+  </section>
+
+  <!-- Panel -->
+  <section id="panel" class="hidden">
+    <div class="card">
+      <h2>Cabezal de riego</h2>
+      <div class="hero">
+        <div class="dot" id="estadoDot">…</div>
+        <div>
+          <div class="big" id="estadoTxt">Cargando…</div>
+          <div class="small" id="estadoSub"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnPausar" class="danger" type="button">Pausar el riego</button>
+        <button id="btnLiberar" class="primary" type="button">Liberar el riego</button>
+        <button id="btnRecargar" type="button">Actualizar</button>
+      </div>
+      <p class="updated" id="actualizado"></p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Horario solar de hoy</h2>
+        <div class="timeline" id="horario"></div>
+        <p class="muted">Son los horarios que vienen por defecto en la app del celular. Si los cambiaste ahí, mandan los de la app.</p>
+      </div>
+      <div class="card">
+        <h2>Sol y lluvia</h2>
+        <p class="muted" style="margin-top:0">Omixom no deja leer sus datos desde otras páginas; la radiación la decide la app del celular.</p>
+        <a href="https://clima.omixom.com" target="_blank" rel="noopener">Abrir mi estación en Omixom ↗</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Programas</h2>
+      <ul class="programs" id="programas"></ul>
+    </div>
+  </section>
+</main>
+
+<dialog id="confirmar">
+  <p id="confirmarTxt" style="margin-top:0"></p>
+  <div class="actions" style="justify-content:flex-end">
+    <button type="button" id="confirmarNo">Cancelar</button>
+    <button type="button" id="confirmarSi" class="primary">Sí</button>
+  </div>
+</dialog>
+
+<script>
+(() => {
+  const API = "https://gsi.galcon-smart.com/api";
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get(k) { try { return localStorage.getItem("riegosolar." + k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem("riegosolar." + k, v); } catch (e) {} },
+    clear() { try { Object.keys(localStorage).filter(k => k.startsWith("riegosolar.")).forEach(k => localStorage.removeItem(k)); } catch (e) {} },
+  };
+
+  // Mismos valores por defecto que la app Android.
+  const HORARIO = { inicio: "08:30", pregunta: "12:30", finInvierno: "18:30", finVerano: "20:30", mesesVerano: [10, 11, 12, 1, 2, 3], minSinSol: 90 };
+
+  const ESTADOS_PROGRAMA = {
+    0: ["Quieto", "idle"], 1: ["Error de configuración", "bad"], 2: ["Sin horario", "warn"],
+    3: ["Condicional", "info"], 4: ["Programado", "info"], 5: ["Falla", "bad"], 6: ["Pausado", "warn"],
+    7: ["Falla", "bad"], 8: ["En cola", "info"], 9: ["En cola (alerta)", "warn"], 10: ["Regando", "ok"],
+    11: ["Regando (alerta)", "warn"], 12: ["Fertilizando", "ok"], 13: ["Fertilizando (alerta)", "warn"],
+  };
+
+  let token = store.get("token");
+  let equipo = null; // {proyecto, unidad, sn, nombre}
+  let timer = null;
+
+  class SinSesion extends Error {}
+
+  async function api(metodo, ruta, cuerpo) {
+    if (!token) throw new SinSesion();
+    const r = await fetch(API + ruta, {
+      method: metodo,
+      headers: Object.assign({ Authorization: "Bearer " + token }, cuerpo ? { "Content-Type": "application/json" } : {}),
+      body: cuerpo ? JSON.stringify(cuerpo) : undefined,
+    });
+    if (r.status === 401 || r.status === 403) throw new SinSesion();
+    if (!r.ok) throw new Error("GSI respondió " + r.status);
+    const texto = await r.text();
+    const j = texto ? JSON.parse(texto) : {};
+    if (j.Result === false) throw new Error("GSI no aceptó la orden");
+    return j;
+  }
+
+  async function login(usuario, clave) {
+    const r = await fetch(API + "/Auth/Login", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: usuario, password: clave }),
+    });
+    const j = await r.json().catch(() => ({}));
+    const tk = j && j.Body && j.Body.AccountToken;
+    if (!r.ok || !j.Result || !tk) throw new Error("Usuario o clave incorrectos");
+    token = tk;
+    store.set("token", tk);
+  }
+
+  async function detectarEquipo() {
+    const guardado = store.get("equipo");
+    if (guardado) { try { return JSON.parse(guardado); } catch (e) {} }
+    const p = (await api("GET", "/api/project/UserProjects")).Body[0];
+    if (!p) throw new Error("No hay proyectos en tu cuenta de GSI");
+    const u = (await api("GET", "/api/project/" + p.ProjectID + "/UnitList")).Body[0];
+    if (!u) throw new Error("No hay controladores en tu proyecto de GSI");
+    const info = (await api("GET", "/api/Unit/" + u.ControlUnitID + "/InfoSetting")).Body;
+    const e = { proyecto: p.ProjectID, unidad: u.ControlUnitID, sn: info.DeviceInfo.SN, nombre: u.UnitName };
+    store.set("equipo", JSON.stringify(e));
+    return e;
+  }
+
+  function mostrar(seccion) {
+    $("login").classList.toggle("hidden", seccion !== "login");
+    $("panel").classList.toggle("hidden", seccion !== "panel");
+    $("salir").classList.toggle("hidden", seccion !== "panel");
+  }
+
+  function hhmm(d) { return d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }); }
+
+  function pintarHorario() {
+    const ahora = new Date();
+    const verano = HORARIO.mesesVerano.includes(ahora.getMonth() + 1);
+    const fin = verano ? HORARIO.finVerano : HORARIO.finInvierno;
+    const filas = [
+      [HORARIO.inicio, "Si hay sol, arranca el riego"],
+      [HORARIO.pregunta, "Desde acá, si faltan " + HORARIO.minSinSol + " min de sol, la app te pregunta"],
+      [fin, "Se pausa hasta mañana (" + (verano ? "horario de verano" : "horario de invierno") + ")"],
+    ];
+    const cont = $("horario");
+    cont.replaceChildren();
+    for (const [h, t] of filas) {
+      const b = document.createElement("b"); b.textContent = h;
+      const s = document.createElement("span"); s.textContent = t;
+      cont.append(b, s);
+    }
+  }
+
+  async function actualizar() {
+    try {
+      if (!equipo) equipo = await detectarEquipo();
+      $("equipo").textContent = equipo.nombre || "Galcon GSI";
+      const [unidad, programas] = await Promise.all([
+        api("GET", "/api/unit/" + equipo.unidad + "?ProjectID=" + equipo.proyecto),
+        api("GET", "/api/Unit/" + equipo.unidad + "/ProgramsListPro?ProjectID=" + equipo.proyecto),
+      ]);
+      const online = (unidad.Body && unidad.Body.OnlinePro) || {};
+      const pausado = ((online.TempPauseLine1 || 0) & 1) !== 0;
+      const lista = programas.Body || [];
+      const regando = lista.filter(p => [10, 11, 12, 13].includes(p.ProgramStatus));
+
+      const dot = $("estadoDot");
+      if (pausado) {
+        dot.className = "dot warn"; dot.textContent = "⏸";
+        $("estadoTxt").textContent = "Pausado";
+        $("estadoSub").textContent = "El Galcon no riega hasta que se libere.";
+      } else if (regando.length) {
+        dot.className = "dot ok"; dot.textContent = "💧";
+        $("estadoTxt").textContent = "Regando";
+        $("estadoSub").textContent = regando.map(p => p.Name.trim() || "Programa " + p.OrderNum).join(", ");
+      } else {
+        dot.className = "dot info"; dot.textContent = "✓";
+        $("estadoTxt").textContent = "Liberado";
+        $("estadoSub").textContent = "Riega según los horarios de sus programas.";
+      }
+      $("btnPausar").disabled = pausado;
+      $("btnLiberar").disabled = !pausado;
+
+      const ul = $("programas");
+      ul.replaceChildren();
+      for (const p of lista) {
+        const li = document.createElement("li");
+        const n = document.createElement("span"); n.className = "num"; n.textContent = p.OrderNum;
+        const nm = document.createElement("span"); nm.className = "name"; nm.textContent = (p.Name || "").trim() || "(sin nombre)";
+        const [txt, cls] = ESTADOS_PROGRAMA[p.ProgramStatus] || ["Estado " + p.ProgramStatus, "idle"];
+        const c = document.createElement("span"); c.className = "chip " + cls; c.textContent = txt;
+        li.append(n, nm, c);
+        ul.append(li);
+      }
+      $("actualizado").textContent = "Actualizado a las " + hhmm(new Date()) + " · se actualiza solo cada minuto";
+      pintarHorario();
+      mostrar("panel");
+    } catch (e) {
+      if (e instanceof SinSesion) { cerrarSesion(); return; }
+      $("actualizado").textContent = "No pude actualizar: " + e.message;
+    }
+  }
+
+  function cerrarSesion() {
+    token = null; equipo = null;
+    store.clear();
+    clearInterval(timer);
+    mostrar("login");
+  }
+
+  function confirmar(texto) {
+    return new Promise((res) => {
+      const d = $("confirmar");
+      $("confirmarTxt").textContent = texto;
+      const fin = (v) => { d.close(); $("confirmarSi").onclick = $("confirmarNo").onclick = null; res(v); };
+      $("confirmarSi").onclick = () => fin(true);
+      $("confirmarNo").onclick = () => fin(false);
+      d.showModal();
+    });
+  }
+
+  async function orden(pausar) {
+    const ok = await confirmar(pausar
+      ? "¿Pausar el cabezal de riego? El Galcon deja de regar hasta que lo liberes (o hasta que la app lo libere cuando haya sol)."
+      : "¿Liberar el cabezal de riego? El Galcon vuelve a regar según sus programas, aunque no haya sol.");
+    if (!ok) return;
+    $("btnPausar").disabled = $("btnLiberar").disabled = true;
+    try {
+      if (pausar) await api("POST", "/API/Online/PauseCurrentPipe", { SN: equipo.sn, PipeNum: 1 });
+      else await api("POST", "/api/Online/ReleasePipe?ProjectID=" + equipo.proyecto, { SN: equipo.sn, PipeNum: 1 });
+      $("actualizado").textContent = "Orden enviada. Esperando que el Galcon responda…";
+      setTimeout(actualizar, 6000);
+    } catch (e) {
+      if (e instanceof SinSesion) { cerrarSesion(); return; }
+      $("actualizado").textContent = "No se pudo: " + e.message;
+      actualizar();
+    }
+  }
+
+  $("formLogin").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    $("errLogin").textContent = "";
+    try {
+      await login($("usuario").value.trim(), $("clave").value);
+      $("clave").value = "";
+      iniciar();
+    } catch (e) {
+      $("errLogin").textContent = e.message === "Failed to fetch" ? "No pude conectar con GSI" : e.message;
+    }
+  });
+  $("btnPausar").onclick = () => orden(true);
+  $("btnLiberar").onclick = () => orden(false);
+  $("btnRecargar").onclick = actualizar;
+  $("salir").onclick = cerrarSesion;
+
+  function iniciar() {
+    actualizar();
+    clearInterval(timer);
+    timer = setInterval(actualizar, 60000);
+  }
+
+  pintarHorario();
+  if (token) iniciar(); else mostrar("login");
+})();
+</script>
+</body>
+</html>
