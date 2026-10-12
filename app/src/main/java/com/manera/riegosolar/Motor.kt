@@ -233,10 +233,11 @@ object Motor {
             }
             modo = deseado
         } catch (e: Exception) {
-            errorGsi = e.message ?: e.javaClass.simpleName
-            registrar(ctx, "No pude ${if (deseado == REGAR) "despausar" else "pausar"} en GSI: $errorGsi")
-            if (st.getString("ultimoErrorGsi", "") != errorGsi) {
-                Notificaciones.aviso(ctx, "Problema con Galcon GSI", errorGsi, error = true)
+            val mensaje = e.message ?: e.javaClass.simpleName
+            errorGsi = mensaje
+            registrar(ctx, "No pude ${if (deseado == REGAR) "despausar" else "pausar"} en GSI: $mensaje")
+            if (st.getString("ultimoErrorGsi", "") != mensaje) {
+                Notificaciones.aviso(ctx, "Problema con Galcon GSI", mensaje, error = true)
             }
         }
 
