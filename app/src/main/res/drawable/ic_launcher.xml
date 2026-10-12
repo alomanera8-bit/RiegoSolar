@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icono de la app: sol amarillo sobre gota azul -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:fillColor="#FF1E6FB8"
+        android:pathData="M24,2a22,22 0,1 0,0.001 0z" />
+    <path
+        android:fillColor="#FF8FD3FF"
+        android:pathData="M24,14c0,0 -10,11 -10,18a10,10 0,0 0,20 0c0,-7 -10,-18 -10,-18z" />
+    <path
+        android:fillColor="#FFFFC531"
+        android:pathData="M34,8a6,6 0,1 0,0.001 0z" />
+</vector>
