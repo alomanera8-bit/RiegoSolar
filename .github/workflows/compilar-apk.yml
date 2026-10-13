@@ -1,0 +1,51 @@
+name: Compilar APK
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
+      # Siempre la misma firma: así cada versión nueva se instala encima de la anterior.
+      - name: Firma fija
+        run: |
+          mkdir -p ~/.android
+          base64 -d firma/debug.keystore.b64 > ~/.android/debug.keystore
+
+      - name: Compilar
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Preparar APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk RiegoSolar.apk
+
+      - name: Subir el APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: RiegoSolar-apk
+          path: RiegoSolar.apk
+
+      # Publica la última versión en un link fijo para descargar desde el celular.
+      - name: Publicar descarga
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete ultima --yes --cleanup-tag || true
+          gh release create ultima RiegoSolar.apk \
+            --title "Riego Solar - última versión" \
+            --notes "Abrí este link desde el celular para instalar la app: https://github.com/${{ github.repository }}/releases/latest/download/RiegoSolar.apk"
